@@ -1,6 +1,7 @@
 import socket
 import tkinter as tk
 import threading as tr
+from PIL import ImageTk, Image
 
 class App(tk.Frame):
     def __init__(self, master=None):
@@ -15,7 +16,12 @@ class App(tk.Frame):
         new_tr.start()
 
     def change_image(self):
-        self.master.configure(background='black')
+        im = Image.open("phoenix.png")
+        im = im.resize((256, 256))
+        self.img = ImageTk.PhotoImage(im)
+        self.lab = tk.Label(self, image=self.img)
+        self.lab.pack()
+        
 
     def start_server(self):
         self.sock.listen(1)
