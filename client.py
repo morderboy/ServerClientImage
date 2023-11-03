@@ -1,6 +1,10 @@
 import socket
 import tkinter as tk
 
+def sub_ip(ip : str):
+    idx = ip.rfind('.')
+    return ip[:idx + 1]
+
 class App(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -18,8 +22,45 @@ class App(tk.Frame):
     def scan_conn(self):
         hostname = socket.gethostname()
         ip = socket.gethostbyname(hostname)
+        ip = sub_ip(ip)
 
-        self.client.connect((ip, 9090))
+        is_connected = False
+        for i in range(0, 15):
+            try:
+                self.client.settimeout(1)
+                self.client.connect((ip + str(i), 9090))
+                self.client.settimeout(None)
+            except socket.timeout:
+                print("timeout:" + str(i))
+                print(self.client.getsockname())
+                self.client.close()
+                self.client = socket.socket()
+                continue
+            except socket.error as msg:
+                print(i)
+                print(msg)
+                self.client.close()
+                self.client = socket.socket()
+                continue
+
+            self.client.send(bytes("HI", 'ascii'))
+            while True:
+                print("start handshake")
+                data = self.client.recv(1024)
+                if not data:
+                    break
+                if (data.decode('utf-8') == "HI"):
+                    is_connected = True
+                    break
+
+            if is_connected:
+                break
+
+        if is_connected:
+            pass
+        else:
+            print(self.client.gettimeout())
+            print("GG WP EZ")
 
 
 root = tk.Tk()

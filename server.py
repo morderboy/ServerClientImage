@@ -8,7 +8,9 @@ class App(tk.Frame):
         self.pack()
 
         self.sock = socket.socket()
-        self.sock.bind(('192.168.1.7', 9090))
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        self.sock.bind((ip, 9090))
         new_tr = tr.Thread(target=self.start_server)
         new_tr.start()
 
@@ -20,10 +22,15 @@ class App(tk.Frame):
 
         user, addr = self.sock.accept()
         while True:
-            data = user.recv(1)
+            data = user.recv(1024)
             if not data:
                 break
-            self.change_image()
+
+            print(str(data))
+            if (data.decode('utf-8') == "HI"):
+                user.send(data)
+            else:
+                self.change_image()
 
 
 root = tk.Tk()
